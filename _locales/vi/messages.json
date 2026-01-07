@@ -1,0 +1,14 @@
+{
+    "extensionName": {
+        "message": "Tự Động Phát Coursera",
+        "description": "The name of the extension in Vietnamese."
+    },
+    "extensionDescription": {
+        "message": "Ngăn Coursera tạm dừng video khi chuyển tab.",
+        "description": "The description of the extension in Vietnamese."
+    },
+    "madeBy": {
+        "message": "Được phát triển bởi Gem Si",
+        "description": "Author attribution in Vietnamese."
+    }
+}

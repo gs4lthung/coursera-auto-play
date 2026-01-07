@@ -1,6 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.getElementById('toggle-override');
     const statusText = document.getElementById('status-text');
+    const authorText = document.querySelector('.author');
+
+    // Localize UI strings
+    if (authorText) {
+        authorText.textContent = chrome.i18n.getMessage('madeBy') || 'Made by Gem Si';
+    }
+    const subtitle = document.querySelector('.subtitle');
+    if (subtitle) {
+        subtitle.textContent = chrome.i18n.getMessage('extensionDescription');
+    }
 
     // Load current state
     chrome.storage.local.get(['overrideEnabled'], (result) => {

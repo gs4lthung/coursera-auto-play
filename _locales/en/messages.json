@@ -1,0 +1,14 @@
+{
+    "extensionName": {
+        "message": "Coursera Auto Play",
+        "description": "The name of the extension."
+    },
+    "extensionDescription": {
+        "message": "Prevent Coursera from pausing videos when the tab loses focus.",
+        "description": "The description of the extension."
+    },
+    "madeBy": {
+        "message": "Made by Gem Si",
+        "description": "Author attribution."
+    }
+}

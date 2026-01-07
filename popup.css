@@ -59,6 +59,7 @@ h1 span {
   color: var(--primary);
   background: linear-gradient(to right, #818cf8, #c084fc);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -165,4 +166,11 @@ footer {
 footer p {
   font-size: 0.75rem;
   color: var(--text-muted);
+}
+
+footer .author {
+  margin-top: 4px;
+  font-weight: 600;
+  color: var(--primary);
+  opacity: 0.8;
 }
