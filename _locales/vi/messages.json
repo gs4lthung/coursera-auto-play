@@ -8,7 +8,7 @@
         "description": "The description of the extension in Vietnamese."
     },
     "madeBy": {
-        "message": "Được thực hiện bởi Gem Si",
+        "message": "Phát triển bởi Gem Si",
         "description": "Author attribution in Vietnamese."
     },
     "autoNextLabel": {

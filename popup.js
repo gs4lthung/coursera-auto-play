@@ -15,10 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const authorText = document.querySelector('.author');
-    if (authorText) {
-        authorText.textContent = chrome.i18n.getMessage('madeBy') || 'Made by Gem Si';
-    }
+    // Localization will handle the name via popup.html spans if needed,
+    // but we remove this override to prevent wiping out the exclusive-name span.
 
     // Load current state
     chrome.storage.local.get([

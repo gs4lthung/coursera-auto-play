@@ -148,6 +148,12 @@
             const currentSpeed = parseFloat(playbackSpeed);
             const nextSpeed = currentSpeed >= 2 ? 1 : currentSpeed + 0.25;
             chrome.storage.local.set({ playbackSpeed: nextSpeed.toString() });
+        } else if (key === 'j' && video) {
+            video.currentTime = Math.max(0, video.currentTime - 10);
+        } else if (key === 'l' && video) {
+            video.currentTime = Math.min(video.duration, video.currentTime + 10);
+        } else if (key === 'm' && video) {
+            video.muted = !video.muted;
         }
     });
 
