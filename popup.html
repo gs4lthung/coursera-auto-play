@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coursera Auto Play</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-area">
+        <img src="icons/icon48.png" alt="Logo" class="logo">
+        <h1>Coursera<span>AutoPlay</span></h1>
+      </div>
+      <p class="subtitle">Focus locked, never paused.</p>
+    </header>
+
+    <div class="card">
+      <div class="status-row">
+        <span class="status-label">Override Active</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-override" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div class="info-box">
+        <p id="status-text">Extension is currently active.</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>Made for multitaskers 🚀</p>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
