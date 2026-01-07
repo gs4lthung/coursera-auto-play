@@ -12,78 +12,100 @@
 <body>
   <div class="container">
     <header>
-      <div class="logo-area">
+      <div class="header-content">
         <img src="icons/icon48.png" alt="Logo" class="logo">
-        <h1>Coursera<span>AutoPlay</span></h1>
+        <div class="title-group">
+          <h1 id="extension-name" class="i18n-link" data-msg="extensionName">Coursera Auto Play</h1>
+          <p class="subtitle i18n-link" data-msg="extensionDescription">Uninterrupted Learning</p>
+        </div>
       </div>
-      <p class="subtitle">Focus locked, never paused.</p>
     </header>
 
-    <div class="card">
-      <div class="status-row">
-        <span class="status-label">Override Active</span>
-        <label class="switch">
-          <input type="checkbox" id="toggle-override" checked>
-          <span class="slider round"></span>
-        </label>
+    <div class="hero-card">
+      <div class="status-indicator">
+        <div class="pulse"></div>
+        <span id="status-text">Active</span>
       </div>
-      <div class="info-box">
-        <p id="status-text">Extension is currently active.</p>
-      </div>
+      <label class="main-switch">
+        <input type="checkbox" id="toggle-override">
+        <span class="main-slider"></span>
+      </label>
     </div>
 
-    <div class="card settings-card">
-      <div class="settings-row">
-        <div class="settings-info">
-          <span class="settings-label i18n-link" data-msg="autoNextLabel">Auto-Next Lesson</span>
-          <p class="settings-desc i18n-link" data-msg="autoNextDesc">Automatically play the next item when video ends.</p>
+    <div class="settings-container">
+      <section class="settings-section">
+        <h2 class="section-title">Core Automation</h2>
+        
+        <div class="settings-card">
+          <div class="settings-row">
+            <div class="settings-info">
+              <span class="icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+              </span>
+              <span class="settings-label i18n-link" data-msg="autoNextLabel">Auto-Next Lesson</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-autonext">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          
+          <div class="settings-row">
+            <div class="settings-info">
+              <span class="icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>
+              </span>
+              <span class="settings-label i18n-link" data-msg="speedLockLabel">Playback Speed</span>
+            </div>
+            <select id="speed-select" class="custom-select">
+              <option value="1">1.0x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+              <option value="1.75">1.75x</option>
+              <option value="2">2.0x</option>
+            </select>
+          </div>
         </div>
-        <label class="switch">
-          <input type="checkbox" id="toggle-autonext">
-          <span class="slider round"></span>
-        </label>
-      </div>
+      </section>
 
-      <div class="settings-row">
-        <div class="settings-info">
-          <span class="settings-label i18n-link" data-msg="speedLockLabel">Playback Speed Lock</span>
-        </div>
-        <select id="speed-select" class="custom-select">
-          <option value="1">1.0x</option>
-          <option value="1.25">1.25x</option>
-          <option value="1.5">1.5x</option>
-          <option value="1.75">1.75x</option>
-          <option value="2">2.0x</option>
-        </select>
-      </div>
+      <section class="settings-section">
+        <h2 class="section-title">Advanced</h2>
+        
+        <div class="settings-card">
+          <div class="settings-row">
+            <div class="settings-info">
+              <span class="icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="settings-label i18n-link" data-msg="quizSkipLabel">Auto-Skip Quizzes</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-quizskip">
+              <span class="slider round"></span>
+            </label>
+          </div>
 
-      <div class="settings-row">
-        <div class="settings-info">
-          <span class="settings-label i18n-link" data-msg="quizSkipLabel">Auto-Skip Quizzes</span>
+          <div class="settings-row">
+            <div class="settings-info">
+              <span class="icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </span>
+              <span class="settings-label i18n-link" data-msg="smartSkipLabel">Smart Skip Intro</span>
+            </div>
+            <div class="skip-control">
+              <input type="number" id="skip-duration" value="10" min="0" max="60" class="mini-input">
+              <label class="switch">
+                <input type="checkbox" id="toggle-smartskip">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
         </div>
-        <label class="switch">
-          <input type="checkbox" id="toggle-quizskip">
-          <span class="slider round"></span>
-        </label>
-      </div>
-
-      <div class="settings-row">
-        <div class="settings-info">
-          <span class="settings-label i18n-link" data-msg="smartSkipLabel">Smart Skip (Intro)</span>
-        </div>
-        <div class="skip-control">
-          <input type="number" id="skip-duration" value="10" min="0" max="60" class="mini-input">
-          <label class="switch">
-            <input type="checkbox" id="toggle-smartskip">
-            <span class="slider round"></span>
-          </label>
-        </div>
-      </div>
+      </section>
     </div>
 
     <footer>
-      <p>Made for multitaskers 🚀</p>
-      <p class="author">Made by Gem Si</p>
+      <p class="author">Developed by <span class="exclusive-name">Gem Si</span></p>
     </footer>
   </div>
   <script src="popup.js"></script>

@@ -82,12 +82,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function updateStatusUI(isEnabled) {
+        const heroCard = document.querySelector('.hero-card');
+        const pulse = document.querySelector('.pulse');
+
         if (isEnabled) {
-            statusText.textContent = 'Extension is currently active. Your videos will keep playing even if you switch tabs.';
-            statusText.style.color = '#94a3b8';
+            statusText.textContent = 'Learning Active';
+            heroCard.style.boxShadow = '0 0 20px rgba(0, 173, 124, 0.2)';
+            if (pulse) pulse.style.background = 'var(--success)';
         } else {
-            statusText.textContent = 'Extension is disabled. Coursera will pause videos when you switch tabs.';
-            statusText.style.color = '#f87171'; // Reddish for disabled state
+            statusText.textContent = 'Paused';
+            heroCard.style.boxShadow = 'none';
+            if (pulse) pulse.style.background = '#ff4b2b';
         }
     }
 });
