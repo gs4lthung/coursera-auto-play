@@ -56,6 +56,29 @@
           <option value="2">2.0x</option>
         </select>
       </div>
+
+      <div class="settings-row">
+        <div class="settings-info">
+          <span class="settings-label i18n-link" data-msg="quizSkipLabel">Auto-Skip Quizzes</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-quizskip">
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-info">
+          <span class="settings-label i18n-link" data-msg="smartSkipLabel">Smart Skip (Intro)</span>
+        </div>
+        <div class="skip-control">
+          <input type="number" id="skip-duration" value="10" min="0" max="60" class="mini-input">
+          <label class="switch">
+            <input type="checkbox" id="toggle-smartskip">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
     </div>
 
     <footer>

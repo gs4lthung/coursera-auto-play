@@ -207,6 +207,28 @@ input:checked + .slider:before {
   border-color: var(--primary);
 }
 
+.skip-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mini-input {
+  width: 45px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-main);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 0.75rem;
+  text-align: center;
+  outline: none;
+}
+
+.mini-input:focus {
+  border-color: var(--primary);
+}
+
 footer {
   text-align: center;
 }

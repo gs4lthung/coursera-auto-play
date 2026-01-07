@@ -22,5 +22,17 @@
     "speedLockLabel": {
         "message": "Playback Speed Lock",
         "description": "Label for the speed lock dropdown."
+    },
+    "quizSkipLabel": {
+        "message": "Auto-Skip Quizzes",
+        "description": "Label for the auto-skip quizzes toggle."
+    },
+    "smartSkipLabel": {
+        "message": "Smart Skip (Intro)",
+        "description": "Label for the smart skip toggle."
+    },
+    "skipSecondsLabel": {
+        "message": "Seconds to skip",
+        "description": "Label for skip seconds input."
     }
 }

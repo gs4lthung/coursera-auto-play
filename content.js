@@ -4,57 +4,65 @@
     let isEnabled = true;
     let autoNextEnabled = false;
     let playbackSpeed = 1;
+    let quizSkipEnabled = false;
+    let smartSkipEnabled = false;
+    let skipDuration = 10;
 
-    function applyOverrides() {
-        if (!isEnabled) return;
+    // --- Bridge Injection (API Overrides in MAIN world) ---
+    function injectBridge() {
+        const script = document.createElement('script');
+        script.textContent = `
+            (function() {
+                const originalVisibilityState = document.visibilityState;
+                const originalHidden = document.hidden;
+                const originalHasFocus = document.hasFocus;
 
-        // Override visibility state to always be 'visible'
-        Object.defineProperty(document, 'visibilityState', {
-            get: function () {
-                return isEnabled ? 'visible' : originalVisibilityState;
-            },
-            configurable: true
-        });
+                function getEnabled() {
+                    return document.documentElement.getAttribute('cap-enabled') === 'true';
+                }
 
-        // Override hidden property to always be false
-        Object.defineProperty(document, 'hidden', {
-            get: function () {
-                return isEnabled ? false : originalHidden;
-            },
-            configurable: true
-        });
+                Object.defineProperty(document, 'visibilityState', {
+                    get: () => getEnabled() ? 'visible' : originalVisibilityState,
+                    configurable: true
+                });
 
-        document.hasFocus = function () {
-            return isEnabled ? true : originalHasFocus();
-        };
+                Object.defineProperty(document, 'hidden', {
+                    get: () => getEnabled() ? false : originalHidden,
+                    configurable: true
+                });
 
-        console.log('[Coursera Auto Play] Overrides applied.');
+                document.hasFocus = function() {
+                    return getEnabled() ? true : originalHasFocus.call(document);
+                };
+
+                // Block events in capture phase
+                const handleEvent = (e) => {
+                    if (getEnabled()) e.stopImmediatePropagation();
+                };
+                window.addEventListener('visibilitychange', handleEvent, true);
+                window.addEventListener('blur', handleEvent, true);
+
+                console.log('[Coursera Auto Play] API Bridge Injected.');
+            })();
+        `;
+        (document.head || document.documentElement).appendChild(script);
+        script.remove();
     }
 
-    // Capture originals
-    const originalVisibilityState = document.visibilityState;
-    const originalHidden = document.hidden;
-    const originalHasFocus = document.hasFocus;
+    function syncBridgeState() {
+        document.documentElement.setAttribute('cap-enabled', isEnabled.toString());
+    }
 
-    // Block events with capture to be first
-    const handleEvent = (e) => {
-        if (isEnabled) {
-            e.stopImmediatePropagation();
-        }
-    };
-
-    window.addEventListener('visibilitychange', handleEvent, true);
-    window.addEventListener('blur', handleEvent, true);
-
-    // --- New Features Logic ---
+    // --- Core Features Logic ---
 
     function applySpeed() {
         if (!isEnabled) return;
         const videos = document.querySelectorAll('video');
+        const speed = parseFloat(playbackSpeed);
         videos.forEach(v => {
-            if (v.playbackRate !== parseFloat(playbackSpeed)) {
-                v.playbackRate = parseFloat(playbackSpeed);
-                console.log(`[Coursera Auto Play] Speed locked to ${playbackSpeed}x`);
+            if (v.playbackRate !== speed) {
+                v.playbackRate = speed;
+                console.log(`[Coursera Auto Play] Speed locked to ${speed}x`);
             }
         });
     }
@@ -62,14 +70,13 @@
     function triggerNext() {
         if (!isEnabled || !autoNextEnabled) return;
 
-        // Common Coursera "Next" button selectors
-        // 1. Primary "Next" button in the footer
-        // 2. Buttons with aria-label or text containing "Next"
         const nextSelectors = [
             'button[data-testid="next-item"]',
             'button[aria-label*="Next"]',
             '.rc-NextItemButton',
-            'button.next-item'
+            'button.next-item',
+            '[class*="next-item"] button',
+            '[class*="NavigationLink"]'
         ];
 
         let nextButton = null;
@@ -78,101 +85,155 @@
             if (nextButton) break;
         }
 
-        // Fallback: search for button with "Next" text
         if (!nextButton) {
-            const buttons = Array.from(document.querySelectorAll('button, a.rc-NavigationLink'));
-            nextButton = buttons.find(b => b.textContent.trim().toLowerCase() === 'next');
+            const buttons = Array.from(document.querySelectorAll('button, a'));
+            nextButton = buttons.find(b => {
+                const text = b.textContent.trim().toLowerCase();
+                return text === 'next' || text === 'tiếp theo' || text === 'bài tiếp theo';
+            });
         }
 
         if (nextButton) {
             console.log('[Coursera Auto Play] Video ended. Navigating to next item...');
-            // Wait 2 seconds before clicking to avoid issues with Coursera's own state updates
-            setTimeout(() => {
-                nextButton.click();
-            }, 2000);
-        } else {
-            console.warn('[Coursera Auto Play] Could not find "Next" button.');
+            setTimeout(() => nextButton.click(), 2000);
         }
     }
 
-    // Monitor for video elements and events
+    // --- Ultimate Features Logic ---
+
+    function checkAndSkipQuizzes() {
+        if (!isEnabled || !quizSkipEnabled) return;
+        const selectors = [
+            'button.rc-QuizQuestionContinueButton',
+            'button.rc-VideoInVideoQuizContinueButton',
+            'button[aria-label*="Continue"]',
+            'button[aria-label*="Tiếp tục"]',
+            '.rc-FormNotification-button',
+            '[class*="quiz"] button',
+            '[class*="Continue"]'
+        ];
+        selectors.forEach(s => {
+            const btn = document.querySelector(s);
+            if (btn && btn.offsetParent !== null) {
+                console.log('[Coursera Auto Play] Quiz detected. Auto-skipping...');
+                btn.click();
+            }
+        });
+    }
+
+    function checkAndSmartSkip(v) {
+        if (!isEnabled || !smartSkipEnabled || v.dataset.capSmartSkipped) return;
+        const skipTime = parseFloat(skipDuration);
+        if (v.currentTime < skipTime) {
+            console.log(`[Coursera Auto Play] Skipping ${skipTime}s intro...`);
+            v.currentTime = skipTime;
+            v.dataset.capSmartSkipped = 'true';
+        }
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+        if (!isEnabled) return;
+        const active = document.activeElement;
+        if (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable) return;
+
+        const key = e.key.toLowerCase();
+        const video = document.querySelector('video');
+
+        if (key === 'n') {
+            triggerNext();
+        } else if (key === 'p' && video) {
+            video.paused ? video.play() : video.pause();
+        } else if (key === 's') {
+            const currentSpeed = parseFloat(playbackSpeed);
+            const nextSpeed = currentSpeed >= 2 ? 1 : currentSpeed + 0.25;
+            chrome.storage.local.set({ playbackSpeed: nextSpeed.toString() });
+        }
+    });
+
+    // Monitor for changes
     const observer = new MutationObserver((mutations) => {
         if (!isEnabled) return;
-
         let hasNewVideos = false;
-        mutations.forEach(mutation => {
-            mutation.addedNodes.forEach(node => {
-                if (node.nodeName === 'VIDEO') {
+        mutations.forEach(m => {
+            m.addedNodes.forEach(node => {
+                if (node.nodeName === 'VIDEO' || (node.querySelectorAll && node.querySelectorAll('video').length > 0)) {
                     hasNewVideos = true;
-                } else if (node.querySelectorAll) {
-                    if (node.querySelectorAll('video').length > 0) {
-                        hasNewVideos = true;
-                    }
                 }
+                checkAndSkipQuizzes();
             });
         });
-
         if (hasNewVideos) {
             applySpeed();
             setupVideoListeners();
         }
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+    setInterval(checkAndSkipQuizzes, 2000);
 
     function setupVideoListeners() {
-        const videos = document.querySelectorAll('video');
-        videos.forEach(v => {
+        document.querySelectorAll('video').forEach(v => {
             if (!v.dataset.capListenersAttached) {
                 v.addEventListener('ended', triggerNext);
-                v.addEventListener('play', applySpeed);
+                v.addEventListener('play', () => {
+                    applySpeed();
+                    checkAndSmartSkip(v);
+                });
+                v.addEventListener('timeupdate', () => checkAndSmartSkip(v));
+                // Anti-reset lock
+                v.addEventListener('ratechange', () => applySpeed());
                 v.dataset.capListenersAttached = 'true';
             }
         });
     }
 
-    // Initial load from storage
-    chrome.storage.local.get(['overrideEnabled', 'autoNextEnabled', 'playbackSpeed'], (result) => {
-        isEnabled = result.overrideEnabled !== false;
-        autoNextEnabled = !!result.autoNextEnabled;
-        playbackSpeed = result.playbackSpeed || 1;
+    // Load from storage
+    function loadSettings() {
+        chrome.storage.local.get([
+            'overrideEnabled',
+            'autoNextEnabled',
+            'playbackSpeed',
+            'quizSkipEnabled',
+            'smartSkipEnabled',
+            'skipDuration'
+        ], (result) => {
+            isEnabled = result.overrideEnabled !== false;
+            autoNextEnabled = !!result.autoNextEnabled;
+            playbackSpeed = result.playbackSpeed || 1;
+            quizSkipEnabled = !!result.quizSkipEnabled;
+            smartSkipEnabled = !!result.smartSkipEnabled;
+            skipDuration = result.skipDuration || 10;
 
-        applyOverrides();
-        applySpeed();
-        setupVideoListeners();
+            syncBridgeState();
+            applySpeed();
+            setupVideoListeners();
 
-        console.log('[Coursera Auto Play] Initial state:', { isEnabled, autoNextEnabled, playbackSpeed });
-    });
+            console.log('[Coursera Auto Play] Settings loaded:', { isEnabled });
+        });
+    }
 
-    // Listen for changes
-    chrome.storage.onChanged.addListener((changes, namespace) => {
-        if (namespace === 'local') {
+    // Listen for storage changes
+    chrome.storage.onChanged.addListener((changes, ns) => {
+        if (ns === 'local') {
             if (changes.overrideEnabled) {
                 isEnabled = changes.overrideEnabled.newValue;
+                syncBridgeState();
                 if (!isEnabled) location.reload();
-                else applyOverrides();
             }
-            if (changes.autoNextEnabled) {
-                autoNextEnabled = changes.autoNextEnabled.newValue;
-            }
+            if (changes.autoNextEnabled) autoNextEnabled = changes.autoNextEnabled.newValue;
             if (changes.playbackSpeed) {
                 playbackSpeed = changes.playbackSpeed.newValue;
                 applySpeed();
             }
-            console.log('[Coursera Auto Play] Settings updated:', { isEnabled, autoNextEnabled, playbackSpeed });
+            if (changes.quizSkipEnabled) quizSkipEnabled = changes.quizSkipEnabled.newValue;
+            if (changes.smartSkipEnabled) smartSkipEnabled = changes.smartSkipEnabled.newValue;
+            if (changes.skipDuration) skipDuration = changes.skipDuration.newValue;
         }
     });
 
-    // Ensure requestAnimationFrame continues to run correctly
-    const originalRaf = window.requestAnimationFrame;
-    window.requestAnimationFrame = function (callback) {
-        return originalRaf(function (timestamp) {
-            try {
-                callback(timestamp);
-            } catch (e) {
-                console.error('requestAnimationFrame callback error:', e);
-            }
-        });
-    };
+    // Run
+    injectBridge();
+    loadSettings();
 
 })();

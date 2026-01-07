@@ -22,5 +22,17 @@
     "speedLockLabel": {
         "message": "Khóa Tốc Độ Phát",
         "description": "Label for the speed lock dropdown in Vietnamese."
+    },
+    "quizSkipLabel": {
+        "message": "Tự Bỏ Qua Câu Hỏi",
+        "description": "Label for the auto-skip quizzes toggle in Vietnamese."
+    },
+    "smartSkipLabel": {
+        "message": "Bỏ Qua Đoạn Đầu",
+        "description": "Label for the smart skip toggle in Vietnamese."
+    },
+    "skipSecondsLabel": {
+        "message": "Số giây bỏ qua",
+        "description": "Label for skip seconds input in Vietnamese."
     }
 }

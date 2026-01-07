@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusText = document.getElementById('status-text');
     const autoNextToggle = document.getElementById('toggle-autonext');
     const speedSelect = document.getElementById('speed-select');
+    const quizSkipToggle = document.getElementById('toggle-quizskip');
+    const smartSkipToggle = document.getElementById('toggle-smartskip');
+    const skipDurationInput = document.getElementById('skip-duration');
 
     // Localize UI strings
     document.querySelectorAll('.i18n-link').forEach(el => {
@@ -18,7 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Load current state
-    chrome.storage.local.get(['overrideEnabled', 'autoNextEnabled', 'playbackSpeed'], (result) => {
+    chrome.storage.local.get([
+        'overrideEnabled',
+        'autoNextEnabled',
+        'playbackSpeed',
+        'quizSkipEnabled',
+        'smartSkipEnabled',
+        'skipDuration'
+    ], (result) => {
         // Main Override
         const isEnabled = result.overrideEnabled !== false;
         toggle.checked = isEnabled;
@@ -30,6 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Playback Speed
         if (result.playbackSpeed) {
             speedSelect.value = result.playbackSpeed;
+        }
+
+        // Ultimate Features
+        quizSkipToggle.checked = !!result.quizSkipEnabled;
+        smartSkipToggle.checked = !!result.smartSkipEnabled;
+        if (result.skipDuration) {
+            skipDurationInput.value = result.skipDuration;
         }
     });
 
@@ -49,6 +66,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Speed change
     speedSelect.addEventListener('change', () => {
         chrome.storage.local.set({ playbackSpeed: speedSelect.value });
+    });
+
+    // Handle Ultimate Feature changes
+    quizSkipToggle.addEventListener('change', () => {
+        chrome.storage.local.set({ quizSkipEnabled: quizSkipToggle.checked });
+    });
+
+    smartSkipToggle.addEventListener('change', () => {
+        chrome.storage.local.set({ smartSkipEnabled: smartSkipToggle.checked });
+    });
+
+    skipDurationInput.addEventListener('change', () => {
+        chrome.storage.local.set({ skipDuration: skipDurationInput.value });
     });
 
     function updateStatusUI(isEnabled) {
