@@ -8,7 +8,19 @@
         "description": "The description of the extension in Vietnamese."
     },
     "madeBy": {
-        "message": "Được phát triển bởi Gem Si",
+        "message": "Được thực hiện bởi Gem Si",
         "description": "Author attribution in Vietnamese."
+    },
+    "autoNextLabel": {
+        "message": "Tự Động Chuyển Bài",
+        "description": "Label for the auto-next toggle in Vietnamese."
+    },
+    "autoNextDesc": {
+        "message": "Tự động phát bài tiếp theo khi video kết thúc.",
+        "description": "Description for the auto-next toggle in Vietnamese."
+    },
+    "speedLockLabel": {
+        "message": "Khóa Tốc Độ Phát",
+        "description": "Label for the speed lock dropdown in Vietnamese."
     }
 }

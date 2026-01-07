@@ -10,5 +10,17 @@
     "madeBy": {
         "message": "Made by Gem Si",
         "description": "Author attribution."
+    },
+    "autoNextLabel": {
+        "message": "Auto-Next Lesson",
+        "description": "Label for the auto-next toggle."
+    },
+    "autoNextDesc": {
+        "message": "Automatically play the next item when video ends.",
+        "description": "Description for the auto-next toggle."
+    },
+    "speedLockLabel": {
+        "message": "Playback Speed Lock",
+        "description": "Label for the speed lock dropdown."
     }
 }

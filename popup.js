@@ -1,22 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.getElementById('toggle-override');
     const statusText = document.getElementById('status-text');
-    const authorText = document.querySelector('.author');
+    const autoNextToggle = document.getElementById('toggle-autonext');
+    const speedSelect = document.getElementById('speed-select');
 
     // Localize UI strings
+    document.querySelectorAll('.i18n-link').forEach(el => {
+        const msg = el.getAttribute('data-msg');
+        if (msg) {
+            el.textContent = chrome.i18n.getMessage(msg);
+        }
+    });
+
+    const authorText = document.querySelector('.author');
     if (authorText) {
         authorText.textContent = chrome.i18n.getMessage('madeBy') || 'Made by Gem Si';
     }
-    const subtitle = document.querySelector('.subtitle');
-    if (subtitle) {
-        subtitle.textContent = chrome.i18n.getMessage('extensionDescription');
-    }
 
     // Load current state
-    chrome.storage.local.get(['overrideEnabled'], (result) => {
-        const isEnabled = result.overrideEnabled !== false; // Default to true
+    chrome.storage.local.get(['overrideEnabled', 'autoNextEnabled', 'playbackSpeed'], (result) => {
+        // Main Override
+        const isEnabled = result.overrideEnabled !== false;
         toggle.checked = isEnabled;
         updateStatusUI(isEnabled);
+
+        // Auto Next
+        autoNextToggle.checked = !!result.autoNextEnabled;
+
+        // Playback Speed
+        if (result.playbackSpeed) {
+            speedSelect.value = result.playbackSpeed;
+        }
     });
 
     // Handle toggle change
@@ -25,6 +39,16 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.local.set({ overrideEnabled: isEnabled }, () => {
             updateStatusUI(isEnabled);
         });
+    });
+
+    // Handle Auto-Next change
+    autoNextToggle.addEventListener('change', () => {
+        chrome.storage.local.set({ autoNextEnabled: autoNextToggle.checked });
+    });
+
+    // Handle Speed change
+    speedSelect.addEventListener('change', () => {
+        chrome.storage.local.set({ playbackSpeed: speedSelect.value });
     });
 
     function updateStatusUI(isEnabled) {
