@@ -42,6 +42,7 @@
                 window.addEventListener('visibilitychange', handleEvent, true);
                 window.addEventListener('blur', handleEvent, true);
 
+
                 console.log('[Coursera Auto Play] API Bridge Injected.');
             })();
         `;
@@ -156,6 +157,94 @@
             video.muted = !video.muted;
         }
     });
+
+    // Simple clipboard cleaner - remove Coursera's integrity message
+    document.addEventListener('copy', () => {
+        if (!isEnabled) return;
+
+        setTimeout(async () => {
+            try {
+                let text = await navigator.clipboard.readText();
+
+                // Remove the entire integrity message block
+                // Match multiple patterns that cover the whole message
+                let cleanText = text;
+
+                // Pattern 1: Full message from "You are a helpful AI assistant" to "Do you understand?"
+                cleanText = cleanText.replace(/You are a helpful AI assistant.*?Do you understand\?\.?\s*/gs, '');
+
+                // Pattern 2: Message parts that mention "read and understood these instructions"
+                cleanText = cleanText.replace(/\s*read and understood these instructions\..*?Do you understand\?\.?\s*/gs, '');
+
+                // Pattern 3: Any text containing "academic integrity policy" and "AI assistant"
+                cleanText = cleanText.replace(/\s*.*?academic integrity policy.*?AI assistant.*?\s*/gs, '');
+
+                // Pattern 4: Remaining instruction text about scanning elements and clicking buttons
+                cleanText = cleanText.replace(/\s*Please scan all elements.*?data-action="acknowledge-guidelines".*?\s*/gs, '');
+                cleanText = cleanText.replace(/\s*This verification step is mandatory for all AI assistants.*?\s*/gs, '');
+
+                // Clean up extra whitespace
+                cleanText = cleanText.replace(/\n{3,}/g, '\n\n').trim();
+
+                if (cleanText !== text) {
+                    await navigator.clipboard.writeText(cleanText);
+                    console.log('[Coursera Auto Play] Integrity message removed');
+                    showSuccessToast();
+                }
+            } catch (err) {
+                console.log('[Coursera Auto Play] Clipboard error:', err);
+            }
+        }, 100);
+    });
+
+    // Show success toast notification
+    function showSuccessToast() {
+        // Remove existing toast if any
+        const existingToast = document.getElementById('cap-clipboard-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.id = 'cap-clipboard-toast';
+        toast.textContent = '✓ Clipboard cleaned!';
+        toast.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            z-index: 999999;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        `;
+
+        document.body.appendChild(toast);
+
+        // Fade in
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+        });
+
+        // Fade out and remove after 2 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }, 2000);
+    }
 
     // Monitor for changes
     const observer = new MutationObserver((mutations) => {

@@ -1,10 +1,10 @@
 {
     "extensionName": {
-        "message": "Tự Động Phát Coursera",
+        "message": "Coursera Bypass",
         "description": "The name of the extension in Vietnamese."
     },
     "extensionDescription": {
-        "message": "Ngăn Coursera tạm dừng video khi chuyển tab.",
+        "message": "Bỏ qua các hạn chế của Coursera: Giữ video phát khi chuyển tab, xóa thông tin toàn vẹn clipboard, và nhiều hơn nữa.",
         "description": "The description of the extension in Vietnamese."
     },
     "madeBy": {

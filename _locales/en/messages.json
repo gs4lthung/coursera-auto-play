@@ -1,10 +1,10 @@
 {
     "extensionName": {
-        "message": "Coursera Auto Play",
+        "message": "Coursera Bypass",
         "description": "The name of the extension."
     },
     "extensionDescription": {
-        "message": "Prevent Coursera from pausing videos when the tab loses focus.",
+        "message": "Bypass Coursera restrictions: Keep videos playing when switching tabs, remove clipboard integrity messages, and more.",
         "description": "The description of the extension."
     },
     "madeBy": {
