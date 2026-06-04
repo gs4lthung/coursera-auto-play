@@ -267,18 +267,86 @@
     observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
     setInterval(checkAndSkipQuizzes, 2000);
 
+    // Timeline lock protection - BLOCK RESETS AT SOURCE
+    const videoProtection = new WeakMap();
+
     function setupVideoListeners() {
         document.querySelectorAll('video').forEach(v => {
             if (!v.dataset.capListenersAttached) {
+                let lastUserSeek = null;
+                let protectionActive = false;
+
+                // Override currentTime on prototype level for all videos
+                const protoDesc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime');
+                Object.defineProperty(v, 'currentTime', {
+                    get: function() {
+                        return protoDesc.get.call(this);
+                    },
+                    set: function(value) {
+                        const current = protoDesc.get.call(this);
+
+                        // Detect if this looks like a Coursera reset (move to near 0 or backwards when protection active)
+                        const isReset = value < 1 || (protectionActive && value < lastUserSeek - 2);
+
+                        if (isReset && protectionActive) {
+                            console.log('[Coursera Auto Play] BLOCKED reset to:', value, 'staying at:', lastUserSeek);
+                            // Don't call the setter - just return
+                            return;
+                        }
+
+                        // Normal seek or forward progress - allow it
+                        const result = protoDesc.set.call(this, value);
+
+                        // Mark this as user intent if it's a significant forward jump
+                        if (value > current + 1) {
+                            lastUserSeek = value;
+                            protectionActive = true;
+                            console.log('[Coursera Auto Play] User seek to:', value);
+                            // Auto-disable after 10s
+                            setTimeout(() => {
+                                protectionActive = false;
+                                console.log('[Coursera Auto Play] Protection expired');
+                            }, 10000);
+                        }
+
+                        return result;
+                    },
+                    configurable: true
+                });
+
+                // Also block their event listeners
+                v.addEventListener('seeking', (e) => {
+                    e.stopImmediatePropagation();
+                }, true);
+
+                v.addEventListener('seeked', (e) => {
+                    e.stopImmediatePropagation();
+                }, true);
+
+                // Monitor for unexpected resets and log them
+                v.addEventListener('timeupdate', () => {
+                    if (protectionActive && lastUserSeek && v.currentTime < lastUserSeek - 1) {
+                        console.log('[Coursera Auto Play] Detected reset, blocking...');
+                        // Force back to protected position
+                        Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime').set.call(v, lastUserSeek);
+                    }
+                    checkAndSmartSkip(v);
+                });
+
+                videoProtection.set(v, {
+                    lastUserSeek: () => lastUserSeek,
+                    isActive: () => protectionActive
+                });
+
                 v.addEventListener('ended', triggerNext);
                 v.addEventListener('play', () => {
                     applySpeed();
                     checkAndSmartSkip(v);
                 });
-                v.addEventListener('timeupdate', () => checkAndSmartSkip(v));
-                // Anti-reset lock
                 v.addEventListener('ratechange', () => applySpeed());
                 v.dataset.capListenersAttached = 'true';
+
+                console.log('[Coursera Auto Play] Anti-reset installed');
             }
         });
     }
